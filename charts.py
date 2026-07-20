@@ -111,3 +111,27 @@ def correlation_heatmap(df):
     )
     fig.update_layout(height=500, margin=dict(l=10, r=10, t=40, b=10))
     return fig
+
+def genre_popularity(df):
+
+    genre = (
+        df.groupby("track_genre", observed=True)["popularity"]
+          .mean()
+          .nlargest(10)
+          .reset_index()
+    )
+
+    fig = px.bar(
+        genre,
+        x="popularity",
+        y="track_genre",
+        orientation="h",
+        color="popularity",
+        title="Top Genres by Average Popularity",
+    )
+
+    fig.update_layout(
+        yaxis=dict(categoryorder="total ascending")
+    )
+
+    return fig
