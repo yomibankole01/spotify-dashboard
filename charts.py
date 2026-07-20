@@ -2,14 +2,22 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 
-def _sample_for_plot(df, max_rows=15000):
+def _sample_for_plot(df, max_rows=12000):
     if len(df) > max_rows:
         return df.sample(max_rows, random_state=42)
     return df
 
 
+def _apply_common_layout(fig, height=450):
+    fig.update_layout(
+        height=height,
+        margin=dict(l=10, r=10, t=40, b=10),
+        template="plotly_dark",
+    )
+
+
 def scatter_popularity(df):
-    draw_df = _sample_for_plot(df, 12000)
+    draw_df = _sample_for_plot(df)
     fig = px.scatter(
         draw_df,
         x="danceability",
@@ -18,9 +26,8 @@ def scatter_popularity(df):
         size="energy",
         hover_data=["track_name", "artists", "album_name"],
         title="Danceability vs Popularity",
-        template="plotly_dark",
     )
-    fig.update_layout(height=450, margin=dict(l=10, r=10, t=40, b=10))
+    _apply_common_layout(fig)
     return fig
 
 
@@ -39,9 +46,8 @@ def top_artists(df):
         orientation="h",
         color="popularity",
         title="Top Artists by Average Popularity",
-        template="plotly_dark",
     )
-    fig.update_layout(height=450, margin=dict(l=10, r=10, t=40, b=10))
+    _apply_common_layout(fig)
     return fig
 
 
@@ -52,9 +58,8 @@ def popularity_distribution(df):
         nbins=25,
         color="explicit",
         title="Popularity Distribution",
-        template="plotly_dark",
     )
-    fig.update_layout(height=450, margin=dict(l=10, r=10, t=40, b=10))
+    _apply_common_layout(fig)
     return fig
 
 
@@ -99,7 +104,7 @@ def correlation_heatmap(df):
         "valence",
         "tempo",
     ]
-    plot_df = _sample_for_plot(df, 10000)
+    plot_df = _sample_for_plot(df, 8000)
     corr = plot_df[cols].corr()
     fig = px.imshow(
         corr,
@@ -107,20 +112,18 @@ def correlation_heatmap(df):
         aspect="auto",
         color_continuous_scale="RdBu_r",
         title="Feature Correlation",
-        template="plotly_dark",
     )
-    fig.update_layout(height=500, margin=dict(l=10, r=10, t=40, b=10))
+    fig.update_layout(height=500, margin=dict(l=10, r=10, t=40, b=10), template="plotly_dark")
     return fig
 
-def genre_popularity(df):
 
+def genre_popularity(df):
     genre = (
         df.groupby("track_genre", observed=True)["popularity"]
-          .mean()
-          .nlargest(10)
-          .reset_index()
+        .mean()
+        .nlargest(10)
+        .reset_index()
     )
-
     fig = px.bar(
         genre,
         x="popularity",
@@ -129,9 +132,6 @@ def genre_popularity(df):
         color="popularity",
         title="Top Genres by Average Popularity",
     )
-
-    fig.update_layout(
-        yaxis=dict(categoryorder="total ascending")
-    )
-
+    fig.update_layout(yaxis=dict(categoryorder="total ascending"))
+    _apply_common_layout(fig, 450)
     return fig
