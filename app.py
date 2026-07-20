@@ -44,18 +44,30 @@ def main():
     st.sidebar.header("Filters")
     options = get_filter_options(data)
 
+    if "selected_artists" not in st.session_state:
+        st.session_state.selected_artists = []
+
     selected_genres = st.sidebar.multiselect(
         "Genre",
         options=options["genres"],
         default=options["genres"][:10],
         placeholder="Search genres",
+        key="genre_filter",
     )
+
+    artist_source = data if not selected_genres else data[data["track_genre"].astype(str).isin(selected_genres)]
+    artist_options = sorted(artist_source["artists"].astype(str).unique())
+    valid_previous_artists = [artist for artist in st.session_state.selected_artists if artist in artist_options]
+    artist_defaults = valid_previous_artists if valid_previous_artists else artist_options
+
     selected_artists = st.sidebar.multiselect(
         "Artist",
-        options=options["artists"],
-        default=options["artists"][:20],
+        options=artist_options,
+        default=artist_defaults,
         placeholder="Search artists",
+        key="artist_filter",
     )
+    st.session_state.selected_artists = selected_artists
     popularity = st.sidebar.slider(
         "Popularity",
         min_value=options["popularity_min"],
