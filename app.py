@@ -56,7 +56,16 @@ def main():
     )
 
     artist_source = data if not selected_genres else data[data["track_genre"].astype(str).isin(selected_genres)]
-    artist_options = sorted(artist_source["artists"].astype(str).unique())
+
+    top_artists = (
+        artist_source.groupby("artists", observed=True)["popularity"]
+        .mean()
+        .sort_values(ascending=False)
+        .head(20)
+        .index.tolist()
+    )
+    artist_options = sorted(top_artists)
+
     valid_previous_artists = [artist for artist in st.session_state.selected_artists if artist in artist_options]
     artist_defaults = valid_previous_artists if valid_previous_artists else artist_options
 
