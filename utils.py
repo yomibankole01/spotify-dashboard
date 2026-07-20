@@ -1,5 +1,8 @@
 import pandas as pd
+import streamlit as st
 
+
+@st.cache_data(show_spinner=False)
 def load_data(file_path):
     """
     Load data from a CSV file.
@@ -22,7 +25,7 @@ def load_data(file_path):
     data = data.drop_duplicates() 
     data = data.dropna()
     data["duration_min"] = data["duration_ms"] / 60000
-    
+
     data["explicit"] = data["explicit"].map(
         {
             True: "Explicit",

@@ -94,7 +94,10 @@ with col3:
 with col4:
     st.plotly_chart(ch.radar_features(filtered), use_container_width=True)
 
-st.plotly_chart(ch.correlation_heatmap(filtered), use_container_width=True)
+show_advanced = st.checkbox("Show advanced charts", value=False)
+
+if show_advanced:
+    st.plotly_chart(ch.correlation_heatmap(filtered), use_container_width=True)
 
 overview, artists, genres = st.tabs(
     [
@@ -102,13 +105,4 @@ overview, artists, genres = st.tabs(
         "Artists",
         "Genres"
     ]
-)
-
-csv = filtered.to_csv(index=False)
-
-st.download_button(
-    "Download filtered data",
-    csv,
-    "spotify_filtered.csv",
-    "text/csv"
 )

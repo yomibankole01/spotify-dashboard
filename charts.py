@@ -1,11 +1,21 @@
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import streamlit as st
 
+
+def _sample_for_plot(df, max_rows=15000):
+    if len(df) > max_rows:
+        return df.sample(max_rows, random_state=42)
+    return df
+
+
+@st.cache_data(show_spinner=False)
 def scatter_popularity(df):
+    draw_df = _sample_for_plot(df, 15000)
 
     fig = px.scatter(
-        df,
+        draw_df,
         x="danceability",
         y="popularity",
         color="track_genre",
@@ -22,6 +32,7 @@ def scatter_popularity(df):
 
     return fig
 
+@st.cache_data(show_spinner=False)
 def top_artists(df):
 
     top = (
@@ -45,6 +56,7 @@ def top_artists(df):
 
     return fig
 
+@st.cache_data(show_spinner=False)
 def popularity_distribution(df):
 
     fig = px.histogram(
@@ -59,6 +71,7 @@ def popularity_distribution(df):
 
     return fig
 
+@st.cache_data(show_spinner=False)
 def radar_features(df):
 
     features = [
@@ -92,6 +105,7 @@ def radar_features(df):
 
     return fig
 
+@st.cache_data(show_spinner=False)
 def correlation_heatmap(df):
 
     cols = [
@@ -106,7 +120,8 @@ def correlation_heatmap(df):
         "tempo"
     ]
 
-    corr = df[cols].corr()
+    plot_df = _sample_for_plot(df, 12000)
+    corr = plot_df[cols].corr()
 
     fig = px.imshow(
         corr,
