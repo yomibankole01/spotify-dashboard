@@ -233,8 +233,10 @@ Filter songs by genre, artist, popularity and explicit content.
 
         with st.expander("Summary Statistics"):
 
+            numeric_cols = filtered.select_dtypes(include="number")
+
             st.dataframe(
-                filtered.describe(numeric_only=True).round(2),
+                numeric_cols.describe().round(2),
                 use_container_width=True,
             )
 
