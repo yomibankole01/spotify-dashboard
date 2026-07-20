@@ -2,107 +2,113 @@ import streamlit as st
 from utils import load_data
 import charts as ch
 
-data = load_data("data/spotify_data.csv")
 
-st.set_page_config(
-    page_title="Spotify Analytics Dashboard",
-    page_icon="🎵",
-    layout="wide"
-)
-
-st.title("🎵 Spotify Analytics Dashboard")
-
-st.markdown(
-"""
-Explore Spotify songs using interactive visualizations.
-
-Use the filters on the left to explore the data.
-"""
-)
-
-st.markdown(
-    """
-    <style>
-
-    .main{
-        background-color:#121212;
+@st.cache_data(show_spinner=False)
+def get_filter_options(data):
+    return {
+        "genres": sorted(data["track_genre"].astype(str).unique()),
+        "artists": sorted(data["artists"].astype(str).unique()),
+        "popularity_min": int(data["popularity"].min()),
+        "popularity_max": int(data["popularity"].max()),
+        "explicit": sorted(data["explicit"].astype(str).unique()),
     }
 
-    </style>
-    """,
-    unsafe_allow_html=True
-)
 
-st.sidebar.header("Filters")
+def main():
+    data = load_data("data/spotify_data.csv")
 
-genres = sorted(data["track_genre"].unique())
+    st.set_page_config(
+        page_title="Spotify Analytics Dashboard",
+        page_icon="🎵",
+        layout="wide",
+    )
 
-selected_genres = st.sidebar.multiselect(
-    "Genre",
-    options=genres,
-    default=genres
-)
+    st.title("🎵 Spotify Analytics Dashboard")
+    st.markdown(
+        """
+        Explore Spotify songs using interactive visualizations.
 
-artists = sorted(data["artists"].unique())
+        Use the filters on the left to explore the data.
+        """
+    )
 
-selected_artists = st.sidebar.multiselect(
-    "Artist",
-    options=artists,
-    default=artists
-)
+    st.markdown(
+        """
+        <style>
+        .main { background-color: #121212; }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
-popularity = st.sidebar.slider(
-    "Popularity",
-    min_value=int(data["popularity"].min()),
-    max_value=int(data["popularity"].max()),
-    value=(int(data["popularity"].min()), int(data["popularity"].max()))
-)
+    st.sidebar.header("Filters")
+    options = get_filter_options(data)
 
-explicit = st.sidebar.multiselect(
-    "Explicit",
-    data["explicit"].unique(),
-    default=data["explicit"].unique()
-)
+    selected_genres = st.sidebar.multiselect(
+        "Genre",
+        options=options["genres"],
+        default=options["genres"][:10],
+        placeholder="Search genres",
+    )
+    selected_artists = st.sidebar.multiselect(
+        "Artist",
+        options=options["artists"],
+        default=options["artists"][:20],
+        placeholder="Search artists",
+    )
+    popularity = st.sidebar.slider(
+        "Popularity",
+        min_value=options["popularity_min"],
+        max_value=options["popularity_max"],
+        value=(options["popularity_min"], options["popularity_max"]),
+    )
+    selected_explicit = st.sidebar.multiselect(
+        "Explicit",
+        options=options["explicit"],
+        default=options["explicit"],
+    )
 
-filtered = data[
-    (data["track_genre"].isin(selected_genres)) &
-    (data["artists"].isin(selected_artists)) &
-    (data["popularity"].between(popularity[0], popularity[1])) &
-    (data["explicit"].isin(explicit))
-]   
+    filtered = data[
+        (data["track_genre"].astype(str).isin(selected_genres))
+        & (data["artists"].astype(str).isin(selected_artists))
+        & (data["popularity"].between(popularity[0], popularity[1]))
+        & (data["explicit"].isin(selected_explicit))
+    ].copy()
 
-col1, col2, col3, col4 = st.columns(4)
+    if filtered.empty:
+        st.info("No songs match the current filters.")
+        return
 
-col1.metric("Total Songs", filtered.shape[0])
-col2.metric("Total Artists", filtered["artists"].nunique())
-col3.metric("Average Popularity", round(filtered["popularity"].mean(), 2))
-col4.metric("Average Danceability", round(filtered["danceability"].mean(), 2))
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("Total Songs", int(filtered.shape[0]))
+    col2.metric("Total Artists", int(filtered["artists"].nunique()))
+    col3.metric("Average Popularity", round(float(filtered["popularity"].mean()), 2))
+    col4.metric("Average Danceability", round(float(filtered["danceability"].mean()), 2))
 
-col1, col2 = st.columns(2)
+    col1, col2 = st.columns(2)
+    with col1:
+        st.plotly_chart(ch.scatter_popularity(filtered), use_container_width=True)
+    with col2:
+        st.plotly_chart(ch.top_artists(filtered), use_container_width=True)
 
-with col1:
-    st.plotly_chart(ch.scatter_popularity(filtered), use_container_width=True)
+    col3, col4 = st.columns(2)
+    with col3:
+        st.plotly_chart(ch.popularity_distribution(filtered), use_container_width=True)
+    with col4:
+        st.plotly_chart(ch.radar_features(filtered), use_container_width=True)
 
-with col2:
-    st.plotly_chart(ch.top_artists(filtered), use_container_width=True)
+    with st.expander("Advanced charts", expanded=False):
+        st.plotly_chart(ch.correlation_heatmap(filtered), use_container_width=True)
 
-col3, col4 = st.columns(2)
+    st.download_button(
+        "Download filtered data",
+        filtered.to_csv(index=False),
+        "spotify_filtered.csv",
+        "text/csv",
+    )
 
-with col3:
-    st.plotly_chart(ch.popularity_distribution(filtered), use_container_width=True)
+    st.tabs(["Overview", "Artists", "Genres"])
 
-with col4:
-    st.plotly_chart(ch.radar_features(filtered), use_container_width=True)
 
-show_advanced = st.checkbox("Show advanced charts", value=False)
-
-if show_advanced:
-    st.plotly_chart(ch.correlation_heatmap(filtered), use_container_width=True)
-
-overview, artists, genres = st.tabs(
-    [
-        "Overview",
-        "Artists",
-        "Genres"
-    ]
-)
+if __name__ == "__main__":
+    main()

@@ -1,7 +1,5 @@
-import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-import streamlit as st
 
 
 def _sample_for_plot(df, max_rows=15000):
@@ -10,70 +8,57 @@ def _sample_for_plot(df, max_rows=15000):
     return df
 
 
-@st.cache_data(show_spinner=False)
 def scatter_popularity(df):
-    draw_df = _sample_for_plot(df, 15000)
-
+    draw_df = _sample_for_plot(df, 12000)
     fig = px.scatter(
         draw_df,
         x="danceability",
         y="popularity",
         color="track_genre",
         size="energy",
-        hover_data=[
-            "track_name",
-            "artists",
-            "album_name"
-        ],
-        title="Danceability vs Popularity"
+        hover_data=["track_name", "artists", "album_name"],
+        title="Danceability vs Popularity",
+        template="plotly_dark",
     )
-
-    fig.update_layout(height=500)
-
+    fig.update_layout(height=450, margin=dict(l=10, r=10, t=40, b=10))
     return fig
 
-@st.cache_data(show_spinner=False)
-def top_artists(df):
 
+def top_artists(df):
     top = (
-        df.groupby("artists")["popularity"]
+        df.groupby("artists", observed=True)["popularity"]
         .mean()
         .sort_values(ascending=False)
         .head(15)
         .reset_index()
     )
-
     fig = px.bar(
         top,
         x="popularity",
         y="artists",
         orientation="h",
         color="popularity",
-        title="Top Artists by Average Popularity"
+        title="Top Artists by Average Popularity",
+        template="plotly_dark",
     )
-
-    fig.update_layout(height=500)
-
+    fig.update_layout(height=450, margin=dict(l=10, r=10, t=40, b=10))
     return fig
 
-@st.cache_data(show_spinner=False)
-def popularity_distribution(df):
 
+def popularity_distribution(df):
     fig = px.histogram(
         df,
         x="popularity",
-        nbins=30,
+        nbins=25,
         color="explicit",
-        title="Popularity Distribution"
+        title="Popularity Distribution",
+        template="plotly_dark",
     )
-
-    fig.update_layout(height=500)
-
+    fig.update_layout(height=450, margin=dict(l=10, r=10, t=40, b=10))
     return fig
 
-@st.cache_data(show_spinner=False)
-def radar_features(df):
 
+def radar_features(df):
     features = [
         "danceability",
         "energy",
@@ -81,33 +66,28 @@ def radar_features(df):
         "acousticness",
         "instrumentalness",
         "liveness",
-        "valence"
+        "valence",
     ]
-
     averages = df[features].mean()
-
     fig = go.Figure()
-
     fig.add_trace(
         go.Scatterpolar(
             r=averages.values,
             theta=features,
             fill="toself",
-            name="Average"
+            name="Average",
         )
     )
-
     fig.update_layout(
         polar=dict(radialaxis=dict(visible=True)),
         title="Average Audio Features",
-        height=500
+        height=450,
+        margin=dict(l=10, r=10, t=40, b=10),
     )
-
     return fig
 
-@st.cache_data(show_spinner=False)
-def correlation_heatmap(df):
 
+def correlation_heatmap(df):
     cols = [
         "popularity",
         "danceability",
@@ -117,20 +97,17 @@ def correlation_heatmap(df):
         "instrumentalness",
         "liveness",
         "valence",
-        "tempo"
+        "tempo",
     ]
-
-    plot_df = _sample_for_plot(df, 12000)
+    plot_df = _sample_for_plot(df, 10000)
     corr = plot_df[cols].corr()
-
     fig = px.imshow(
         corr,
         text_auto=True,
         aspect="auto",
         color_continuous_scale="RdBu_r",
-        title="Feature Correlation"
+        title="Feature Correlation",
+        template="plotly_dark",
     )
-
-    fig.update_layout(height=600)
-
+    fig.update_layout(height=500, margin=dict(l=10, r=10, t=40, b=10))
     return fig
