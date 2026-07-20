@@ -101,25 +101,17 @@ Filter songs by genre, popularity and explicit content.
     )
     col4.metric("💃 Danceability", f"{filtered['danceability'].mean():.2f}")
 
-    overview, artists_tab, genres_tab = st.tabs(["Overview", "Artists", "Genres"])
+    col1, col2 = st.columns(2)
+    with col1:
+        st.plotly_chart(ch.scatter_popularity(filtered), use_container_width=True)
+    with col2:
+        st.plotly_chart(ch.popularity_distribution(filtered), use_container_width=True)
 
-    with overview:
-        col1, col2 = st.columns(2)
-        with col1:
-            st.plotly_chart(ch.scatter_popularity(filtered), use_container_width=True)
-        with col2:
-            st.plotly_chart(ch.popularity_distribution(filtered), use_container_width=True)
+    st.plotly_chart(ch.top_artists(filtered), use_container_width=True)
+    st.plotly_chart(ch.genre_popularity(filtered), use_container_width=True)
 
-    with artists_tab:
-        st.plotly_chart(ch.top_artists(filtered), use_container_width=True)
-        with st.expander("Summary Statistics"):
-            numeric_cols = filtered.select_dtypes(include="number")
-            st.dataframe(numeric_cols.describe().round(2), use_container_width=True)
-
-    with genres_tab:
-        st.plotly_chart(ch.genre_popularity(filtered), use_container_width=True)
-        with st.expander("Preview Dataset"):
-            st.dataframe(filtered, use_container_width=True, height=350)
+    with st.expander("Preview Dataset"):
+        st.dataframe(filtered, use_container_width=True, height=350)
 
     # ------------------ DOWNLOAD ------------------ #
 
