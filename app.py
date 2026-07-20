@@ -110,12 +110,6 @@ Filter songs by genre, popularity and explicit content.
         with col2:
             st.plotly_chart(ch.popularity_distribution(filtered), use_container_width=True)
 
-        col3, col4 = st.columns(2)
-        with col3:
-            st.plotly_chart(ch.radar_features(filtered), use_container_width=True)
-        with col4:
-            st.plotly_chart(ch.correlation_heatmap(filtered), use_container_width=True)
-
     with artists_tab:
         st.plotly_chart(ch.top_artists(filtered), use_container_width=True)
         with st.expander("Summary Statistics"):
