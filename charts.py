@@ -63,60 +63,6 @@ def popularity_distribution(df):
     return fig
 
 
-def radar_features(df):
-    features = [
-        "danceability",
-        "energy",
-        "speechiness",
-        "acousticness",
-        "instrumentalness",
-        "liveness",
-        "valence",
-    ]
-    averages = df[features].mean()
-    fig = go.Figure()
-    fig.add_trace(
-        go.Scatterpolar(
-            r=averages.values,
-            theta=features,
-            fill="toself",
-            name="Average",
-        )
-    )
-    fig.update_layout(
-        polar=dict(radialaxis=dict(visible=True)),
-        title="Average Audio Features",
-        height=450,
-        margin=dict(l=10, r=10, t=40, b=10),
-    )
-    return fig
-
-
-def correlation_heatmap(df):
-    cols = [
-        "popularity",
-        "danceability",
-        "energy",
-        "speechiness",
-        "acousticness",
-        "instrumentalness",
-        "liveness",
-        "valence",
-        "tempo",
-    ]
-    plot_df = _sample_for_plot(df, 8000)
-    corr = plot_df[cols].corr()
-    fig = px.imshow(
-        corr,
-        text_auto=True,
-        aspect="auto",
-        color_continuous_scale="RdBu_r",
-        title="Feature Correlation",
-    )
-    fig.update_layout(height=500, margin=dict(l=10, r=10, t=40, b=10), template="plotly_dark")
-    return fig
-
-
 def genre_popularity(df):
     genre = (
         df.groupby("track_genre", observed=True)["popularity"]
