@@ -26,6 +26,12 @@ def scatter_popularity(df):
         size="energy",
         hover_data=["track_name", "artists", "album_name"],
         title="Danceability vs Popularity",
+        labels={
+            "danceability": "Danceability",
+            "popularity": "Popularity",
+            "track_genre": "Genre",
+            "energy": "Energy",
+        },
     )
     _apply_common_layout(fig)
     return fig
@@ -46,6 +52,7 @@ def top_artists(df):
         orientation="h",
         color="popularity",
         title="Top Artists by Average Popularity",
+        labels={"popularity": "Average Popularity", "artists": "Artist"},
     )
     _apply_common_layout(fig)
     return fig
@@ -58,6 +65,7 @@ def popularity_distribution(df):
         nbins=25,
         color="explicit",
         title="Popularity Distribution",
+        labels={"popularity": "Popularity", "explicit": "Explicit Label"},
     )
     _apply_common_layout(fig)
     return fig
@@ -70,14 +78,14 @@ def genre_popularity(df):
         .nlargest(10)
         .reset_index()
     )
-    fig = px.bar(
+    fig = px.treemap(
         genre,
-        x="popularity",
-        y="track_genre",
-        orientation="h",
-        color="popularity",
+        path=[px.Constant("Genres"), "track_genre"],
+        values="popularity",
+        color="track_genre",
+        color_discrete_sequence=px.colors.qualitative.Set3,
         title="Top Genres by Average Popularity",
+        labels={"popularity": "Average Popularity", "track_genre": "Genre"},
     )
-    fig.update_layout(yaxis=dict(categoryorder="total ascending"))
     _apply_common_layout(fig, 450)
     return fig

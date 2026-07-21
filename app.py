@@ -24,8 +24,9 @@ def main():
     st.title("🎵 Spotify Analytics Dashboard")
     st.markdown(
         """
-        Explore Spotify songs using interactive visualizations.
-        Filter songs by genre, popularity and explicit content.
+        Explore Spotify songs through four linked charts that tell a single story:
+        how popularity varies by danceability, how it is distributed, which artists lead,
+        and which genres stand out.
         """
     )
     
@@ -88,14 +89,17 @@ def main():
     )
     col4.metric("💃 Danceability", f"{filtered['danceability'].mean():.2f}")
 
-    # ------------------ CHARTS MATRIX ROW 1 ------------------ #
+    st.subheader("How the charts connect")
+    st.caption(
+        "The scatter plot shows the relationship between danceability and popularity, the histogram shows the overall shape of popularity, the artist chart highlights leaders, and the genre chart places those leaders in a wider context."
+    )
+
     row1_col1, row1_col2 = st.columns(2)
     with row1_col1:
         st.plotly_chart(ch.scatter_popularity(filtered), use_container_width=True)
     with row1_col2:
         st.plotly_chart(ch.popularity_distribution(filtered), use_container_width=True)
 
-    # ------------------ CHARTS MATRIX ROW 2 (UPDATED FOR 2x2 GRID) ------------------ #
     row2_col1, row2_col2 = st.columns(2)
     with row2_col1:
         st.plotly_chart(ch.top_artists(filtered), use_container_width=True)
