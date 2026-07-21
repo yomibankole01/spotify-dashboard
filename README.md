@@ -45,13 +45,17 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-4. Run the dashboard locally:
+4. Run the dashboard:
+Locally
 
 ```bash
 streamlit run app.py
 ```
 
 The app should open in your browser at the local Streamlit URL.
+
+From anywhere
+https://spotify-dashboard-a.streamlit.app/
 
 ## Dataset
 
