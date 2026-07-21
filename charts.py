@@ -78,6 +78,9 @@ def genre_popularity(df):
         .nlargest(10)
         .reset_index()
     )
+    genre = genre.copy()
+    genre["track_genre"] = genre["track_genre"].astype(str)
+
     fig = px.treemap(
         genre,
         path=[px.Constant("Genres"), "track_genre"],
